@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "mode": "panorama",
+  "count": 20,
+  "width": 76,
+  "height": 1024,
+  "frames": [
+    {
+      "index": 1,
+      "file": "images/01.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "1f16c485ef7cb1b5e980998875b2b3660d5d28ca536ea8536a26ac4ab8579d9b",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "aa10b08c1c45ac0a4ecd3511f2aa02793236807b9cfa22d9d010c434afe133cc",
+      "bytes": 180890
+    },
+    {
+      "index": 2,
+      "file": "images/02.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "2d8f4cb792833bd945f4646385d7affb281f166316eb839545db0a618bd72a3c",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "ef836d3188d9ea9c7f60f2879acd59309aab8414fc7fc3980228e0d6e8544188",
+      "bytes": 176439
+    },
+    {
+      "index": 3,
+      "file": "images/03.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "19a06cfe01c01d5086653cf0be2d73be049b64bf59e91b2ffd12b4fa0bf6820c",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "daa0650a26cc1fd49324df5f4b37a44801f54e2d8dfc6af695759810ab63cc22",
+      "bytes": 168282
+    },
+    {
+      "index": 4,
+      "file": "images/04.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "1dbf646b7b19b40b0c4a2be2e4f36804969fe6730100025aefc7bdfabc07fdea",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "af2c889500a88ae9c9309fd92d35a065856085352724d7a6b02bd14055cf94e2",
+      "bytes": 161887
+    },
+    {
+      "index": 5,
+      "file": "images/05.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "041f62da7fc7463dd0a6ad95faf3a58609945d479800bb69d113b565475d0331",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "ed443e7c6f1813d3b078a8d3faa635ec5e808e7183b5806db70e80dc9b9ff485",
+      "bytes": 160186
+    },
+    {
+      "index": 6,
+      "file": "images/06.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "f5963386b9d4d6c0c69149a64ef40d0d03809ca0ff96875bf808f6f57066964d",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "1d287360adc8aa23e5fd58b353f0818ef065f1cddb0b3f1e063ea13d937920a5",
+      "bytes": 156504
+    },
+    {
+      "index": 7,
+      "file": "images/07.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "760834324a355ba456b6eb859aeed41b2b628ef401068b8ac24fd0dd7ce7b890",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "ca97ba9722b7e2b44404e5ed4e99fadd89ed638f655f06f33fa4ecd5d2519743",
+      "bytes": 158073
+    },
+    {
+      "index": 8,
+      "file": "images/08.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "9fc3fb7d6422a01ef642d591c21d201597fb9034fd92d479d1d5214e1b4d06a3",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "4c19dfaeb3646ea624b65502419d611bfeff5f91db4fba103f20bac4c0a15299",
+      "bytes": 154003
+    },
+    {
+      "index": 9,
+      "file": "images/09.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "b43fa975f7cb866da02719302bf431306765a49500c02e85e2ee4c0fce6e95e0",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "1699ed35d94bcdc01140d09cae629907711a987f9cd2f86422b69f6744970b0d",
+      "bytes": 149346
+    },
+    {
+      "index": 10,
+      "file": "images/10.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "42ad292efa043b2a8102caec2429a5443515a050aae8a2e318c12ea2b824ea2b",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "d8c8545bb7b1471f7270d35f9b7a3b362fdb6deb2c03212c03ef3fb8ef366a98",
+      "bytes": 151749
+    },
+    {
+      "index": 11,
+      "file": "images/11.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "6b108058546ded2dd3d1b219f73bbc168d078abdcd08b452d8897ccefa6b2fc4",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "c33087928732334d3c25e708287b86d0533e305df829405a1ebb96cf8001e3c6",
+      "bytes": 146502
+    },
+    {
+      "index": 12,
+      "file": "images/12.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "a81daba862b67b08ed01750c23638bf68351b333194b96199247ae1b83cd5d88",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "7cfb392e057aa4afeb78428900f2eaec342846ceaecd111546f9f45270f3fb8b",
+      "bytes": 146659
+    },
+    {
+      "index": 13,
+      "file": "images/13.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "1e4b77706b25db138f04876b5d0f0f6a750771a56500a73bc6d0364706b9e090",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "fde983865a9494b7b54ac7d7ed0fb1a89196219b26e5d7b2b6a0d98848526e3f",
+      "bytes": 145346
+    },
+    {
+      "index": 14,
+      "file": "images/14.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "42f51364fa4540090c027aa68ab7e7152de8a3e35f29e146479617246e06f265",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "e068f5b27ea5f27459509161127849c4b94acb3f9c92ce61257db4bfb97f8855",
+      "bytes": 146409
+    },
+    {
+      "index": 15,
+      "file": "images/15.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "969181ac65a8819015a71e8afb29307e30f7f5dc0f8ec28dfdb1616faf55ff4d",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "0e343585dc898102d7f334b5f2c27d0a476ba570af5bff76841128199694d2b6",
+      "bytes": 146952
+    },
+    {
+      "index": 16,
+      "file": "images/16.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "914620d79a576d9bb6290d3d48e6c0a9a8f1df209f834e3a12e495697f03b6bd",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "4d5a257540aee85e349ba693601d05fe89268c347f2cf8ade55ba7295994839f",
+      "bytes": 153002
+    },
+    {
+      "index": 17,
+      "file": "images/17.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "e9d45eee7c7ca599d767c8d51285daa2c9fd72b42d52fed834bbdddb7c2ad54d",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "2b632ae6495aa9bcca87b329921a33d7deea349d419d59f91bc53623a531d1f7",
+      "bytes": 156030
+    },
+    {
+      "index": 18,
+      "file": "images/18.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "36ada9551bd1a7bdf86cdfb244df9f8727bfd1bd82faeef2e0ad2d2d8f909764",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "1f3a21ff6607e246bbabbd086d74daf5b1447b8e0bbd270ded4517bc4dcec0c9",
+      "bytes": 157462
+    },
+    {
+      "index": 19,
+      "file": "images/19.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "cac641736c1c0d1a50098b7d4ced02006913aff5f6e2d285008e63e84d93cc8d",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "0d849d0eaf81b29822bff95ebad9f008da6b33521cc92d8126575ae278a0dc45",
+      "bytes": 160680
+    },
+    {
+      "index": 20,
+      "file": "images/20.png",
+      "width": 76,
+      "height": 1024,
+      "pixels_sha256": "9603a0486d6bb5f34bae1e90bb871d057dd8307e034b6997abb613132517e6f1",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "d990f10bfa1f40c6c1e06ccea06bdf393665ee5987b8edfd5cd4f462c70973df",
+      "bytes": 159419
+    }
+  ],
+  "panorama_reconstruction_matches": true,
+  "edge_mae": [
+    0.043034,
+    0.035312,
+    0.033401,
+    0.027304,
+    0.03087,
+    0.024379,
+    0.030054,
+    0.024929,
+    0.020818,
+    0.019188,
+    0.015731,
+    0.021583,
+    0.016909,
+    0.02422,
+    0.021113,
+    0.021361,
+    0.025619,
+    0.028458,
+    0.032796
+  ],
+  "privacy_skill": "completed",
+  "x_client_verified": false,
+  "notes": [
+    "Edge errors are diagnostic only; inspect thin connecting lines visually.",
+    "Preview is a local simulation, not an X client verification."
+  ]
+}

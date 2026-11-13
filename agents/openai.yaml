@@ -1,0 +1,6 @@
+interface:
+  display_name: "X 多图视觉玩法"
+  short_description: "制作窄条物件、二十图切片和横滑揭晓，精确导出独立图片并校验顺序尺寸"
+  default_prompt: "用 $sweety-x-image-play 根据我的主题制作一组 X 多图视觉作品，交付独立图片、尺寸检查和横滑模拟预览。"
+policy:
+  allow_implicit_invocation: true

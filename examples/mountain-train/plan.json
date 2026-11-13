@@ -1,0 +1,8 @@
+{
+  "mode": "panorama",
+  "count": 20,
+  "width": 76,
+  "height": 1024,
+  "source": "master.png",
+  "fit": "exact"
+}

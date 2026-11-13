@@ -1,0 +1,9 @@
+{
+  "tool": "Codex built-in image generation",
+  "model": "Tool did not expose an exact model identifier",
+  "prompts": [
+    "Create one original panoramic illustration, landscape 3:2 composition: a miniature orange train traveling from left to right across an elegant long curved viaduct above layered blue-green mountains and soft clouds, dawn coral light, editorial gouache texture, cohesive single continuous landscape, train occupies middle horizontal band, bridge runs across entire image. No letters no logos no panels no borders. Intended as master image for twenty contiguous vertical strips; distribute visual interest across full width. Highest quality.",
+    "Create one original panoramic story illustration, landscape 3:2. On the far left a small whimsical mint green robot holds one end of a vivid orange yarn, the yarn winds continuously horizontally across a warm cream studio floor with a tiny paper boat near center, at the far right a fluffy white cat wearing a little knitted orange scarf is revealed. Strong readable silhouettes, playful sophisticated gouache children's editorial illustration, warm cream backdrop, consistent perspective and light, plenty of breathing space. No text no watermarks no separate panels. One coherent composition for contiguous vertical slicing.",
+    "Create one original panoramic illustration landscape 3:2: a magnificent long turquoise Chinese dragon winds horizontally through soft ivory clouds, its expressive friendly head at far left, flowing body with coral fins across center and long curling tail ending at right, tiny golden sun, refined hand painted ink and gouache on warm paper, clear connected silhouette and continuous anatomy, no text no signature no border no panels. Suitable as master picture for twenty vertical slices."
+  ]
+}
