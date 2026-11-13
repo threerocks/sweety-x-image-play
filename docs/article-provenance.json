@@ -1,0 +1,22 @@
+{
+  "tool": "agy CLI",
+  "requested_model_id": "gemini-4-hydrogen-high",
+  "model_label_observed_in_cli_log": "Gemini 4 Hydrogen (High)",
+  "generation_status": "SUCCESS",
+  "turns": 1,
+  "duration_seconds": 45.161909,
+  "usage": {
+    "input_tokens": 12728,
+    "output_tokens": 9620,
+    "thinking_tokens": 7556,
+    "cache_read_tokens": 0,
+    "total_tokens": 22348
+  },
+  "editing": "Article drafted and revised through agy; Codex made two factual copyedits: prerequisites and CDN-loaded size wording.",
+  "article_sha256": "9e6480e833b5d5570681186211c380b2f8364b02beab8ad0a8694cd1cfe0a1b1",
+  "review": {
+    "facts_checked_against": "research.md and validation.json",
+    "external_article_publication": false,
+    "scope": "Public Skill launch article; no invented reach or revenue"
+  }
+}

@@ -134,6 +134,8 @@ python3 scripts/test_export_images.py
 
 先确定读者为什么要滑，再决定数量。长桥、绳子、龙身可以自然连接相邻图片；普通头像被切成二十份，五官可能正好落在界面缝隙里。遇到这种情况，减少切片数或换成更适合横向展开的构图。
 
+对外介绍：[Skill 发布文章](docs/launch-article.zh-CN.md)。
+
 详细说明：[创意模板](references/creative-recipes.md) · [Skill 入口](SKILL.md) · [实测参考帖](references/observed-examples.md)。
 
 ## 使用与贡献
