@@ -24,15 +24,29 @@
 
 | 示例 | 实际文件规格 | 成品 | 预览 |
 |---|---|---|---|
+| 独立窄条：四支彩铅 | 4 张，每张 40×1920 | [下载 ZIP](examples/pencils-independent/set/images.zip) · [逐张文件](examples/pencils-independent/set/images) | [并排预览](examples/pencils-independent/preview.png) |
+| 横滑揭晓：伸长手臂摸猫头 | 20 张，每张 780×1200 | [下载 ZIP](examples/arm-reveal/set/images.zip) · [逐张文件](examples/arm-reveal/set/images) | [逐帧演示](examples/arm-reveal/sequence.gif) · [首中尾对照](examples/arm-reveal/preview.png) |
 | 云海列车 | 20 张，每张 76×1024 | [下载 ZIP](examples/mountain-train/set/images.zip) · [逐张文件](examples/mountain-train/set/images) | [母图](examples/mountain-train/master.png) · [模拟拼图](examples/mountain-train/preview.png) |
 | 机器人与猫咪 | 20 张，每张 76×1024 | [下载 ZIP](examples/robot-cat/set/images.zip) · [逐张文件](examples/robot-cat/set/images) | [母图](examples/robot-cat/master.png) · [模拟拼图](examples/robot-cat/preview.png) |
 | 云中游龙 | 20 张，每张 76×1024 | [下载 ZIP](examples/cloud-dragon/set/images.zip) · [逐张文件](examples/cloud-dragon/set/images) | [母图](examples/cloud-dragon/master.png) · [模拟拼图](examples/cloud-dragon/preview.png) |
 
-![机器人与猫咪切片预览](examples/robot-cat/preview.png)
+### 三种模式看哪里
+
+**独立窄条：每张是一件完整的物体。** 四支彩铅各占一张 40×1920 图片，并排时突出细长比例。
+
+![四支独立彩铅缩小并排预览](examples/pencils-independent/preview.png)
+
+**连续切片：所有图片拼成一幅画。** 页首的列车是连续切片，轨道和桥梁从一张接到下一张。
+
+**横滑揭晓：首图开始动作，末图才给答案。** 人物伸出手臂，中段持续延长，最后摸到猫咪头。以下是按成品顺序制作的本地逐帧演示，不是 X 实机录屏；上传的仍是 20 张独立 PNG。
+
+![伸长手臂横滑揭晓逐帧演示](examples/arm-reveal/sequence.gif)
+
+[首图／中段／尾图静态对照](examples/arm-reveal/preview.png)。中段资产在实际成品中重复 18 次。配套 [plan.json](examples/arm-reveal/plan.json) 使用 `reveal` 的 `head`、`bridge`、`tail` 字段，可直接复现。人物与猫咪为新生成素材；玩法参考 [原帖](https://x.com/ripped1taliano/status/2121044139705778359)。
 
 每套附有 `preview.html`：下载仓库后在本地浏览器打开，可调显示高度、图间距并滑到末尾。GitHub 文件页显示 HTML 源码，不会直接运行预览。此页面模拟横排关系，**不等于 X 客户端验收**。
 
-母图原尺寸为 1536×1024；为得到 20 张等宽切片，左右各裁 8 像素，得到 1520×1024。没有把整幅图挤窄或拉长。
+三套连续切片的母图原尺寸为 1536×1024；为得到 20 张等宽切片，左右各裁 8 像素，得到 1520×1024。没有把整幅图挤窄或拉长。手臂揭晓使用三类 780×1200 素材：从 2172×724 母图取得三块 724×724 区域，分别等比缩放至 780×780，再上下补白；以首图 + 18 张中段 + 尾图组成序列。四支彩铅复用本项目早前完成的原创成品。五套合计 84 张独立 PNG。
 
 ## 安装到 Codex
 

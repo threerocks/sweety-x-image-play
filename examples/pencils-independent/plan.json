@@ -1,0 +1,13 @@
+{
+  "mode": "independent",
+  "count": 4,
+  "width": 40,
+  "height": 1920,
+  "assets": [
+    "assets/01.png",
+    "assets/02.png",
+    "assets/03.png",
+    "assets/04.png"
+  ],
+  "fit": "exact"
+}

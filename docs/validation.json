@@ -36,10 +36,68 @@
       "x_client_verified": false,
       "example": "robot-cat",
       "exact_reconstruction_after_privacy": true
+    },
+    {
+      "file_checks_passed": true,
+      "count": 4,
+      "width": 40,
+      "height": 1920,
+      "privacy_workflow_complete": true,
+      "privacy_skill": "completed",
+      "x_client_verified": false,
+      "example": "pencils-independent",
+      "mode": "independent"
+    },
+    {
+      "file_checks_passed": true,
+      "count": 20,
+      "width": 780,
+      "height": 1200,
+      "privacy_workflow_complete": true,
+      "privacy_skill": "completed",
+      "x_client_verified": false,
+      "example": "arm-reveal",
+      "mode": "reveal"
     }
   ],
-  "visual_review": "All three final strip composites inspected; image continuity and subjects checked. Interface gaps visibly split some faces.",
+  "visual_review": "Three panorama composites, four-pencil preview and arm-reveal head/bridge/tail inspected. Arm connects at matching boundary heights within one pixel. Simulated image gaps may split details.",
   "html_browser_render_verified": false,
   "x_client_verified": false,
-  "metadata": "Privacy skill completed on images, masters and previews; embedded EXIF/text fields removed afterward. OS provenance may remain."
+  "metadata": "Privacy skill completed on images, masters and previews; embedded EXIF/text fields removed afterward. OS provenance may remain.",
+  "arm_reveal": {
+    "count": 20,
+    "width": 780,
+    "height": 1200,
+    "bridge_repetitions": 18,
+    "endpoints_match_assets": true,
+    "all_bridge_frames_identical": true,
+    "arm_edge_positions": [
+      {
+        "file": "01.png",
+        "edge": 779,
+        "top": 537,
+        "bottom": 578
+      },
+      {
+        "file": "02.png",
+        "edge": 0,
+        "top": 537,
+        "bottom": 578
+      },
+      {
+        "file": "02.png",
+        "edge": 779,
+        "top": 537,
+        "bottom": 578
+      },
+      {
+        "file": "20.png",
+        "edge": 0,
+        "top": 537,
+        "bottom": 578
+      }
+    ],
+    "gif_frames": 20,
+    "gif_is_x_recording": false
+  }
 }

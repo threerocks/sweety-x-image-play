@@ -1,0 +1,10 @@
+{
+  "mode": "reveal",
+  "count": 20,
+  "width": 780,
+  "height": 1200,
+  "head": "assets/head.png",
+  "bridge": "assets/bridge.png",
+  "tail": "assets/tail.png",
+  "fit": "exact"
+}

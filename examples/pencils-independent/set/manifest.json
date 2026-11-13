@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "mode": "independent",
+  "count": 4,
+  "width": 40,
+  "height": 1920,
+  "frames": [
+    {
+      "index": 1,
+      "file": "images/01.png",
+      "width": 40,
+      "height": 1920,
+      "pixels_sha256": "c0bcecdeda39c72d440bb95dd48268322494b0de8b3d1465f45c4061b81bb92b",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "16d534d785da83edd45e68d77b66e836a8a5a790407183ad4b362800207aa0dd",
+      "bytes": 43743
+    },
+    {
+      "index": 2,
+      "file": "images/02.png",
+      "width": 40,
+      "height": 1920,
+      "pixels_sha256": "cea261bbc5d920ffb20e4c864dfd70f0ba267be51a213e40b937e45f7934e834",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "2bb167381c230f83241ced9939b00557b88d48bfef11c2c52759575654ed05e6",
+      "bytes": 44188
+    },
+    {
+      "index": 3,
+      "file": "images/03.png",
+      "width": 40,
+      "height": 1920,
+      "pixels_sha256": "2df0cb433a839279e5dcea6bb2208541af9c9d94fd417ba052c5296cdd126013",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "7095c32073a90ba3d1ae3c1a3fe028f85f128e088cb64e7f5bcbe07cf0e2fc9d",
+      "bytes": 42966
+    },
+    {
+      "index": 4,
+      "file": "images/04.png",
+      "width": 40,
+      "height": 1920,
+      "pixels_sha256": "47f6b3b25957394b66fc133abc16eec6f467c2519cdc09736372414f595eabfa",
+      "mac_source_attributes": {
+        "supported": false,
+        "remaining": []
+      },
+      "sha256": "28c2e576775f24487e9df28ff58a2e9e53c11f619dc2d43268a872634c723c76",
+      "bytes": 40644
+    }
+  ],
+  "panorama_reconstruction_matches": null,
+  "edge_mae": [
+    0.002923,
+    0.002754,
+    0.004114
+  ],
+  "privacy_skill": "completed",
+  "x_client_verified": false,
+  "notes": [
+    "Edge errors are diagnostic only; inspect thin connecting lines visually.",
+    "Preview is a local simulation, not an X client verification."
+  ]
+}
