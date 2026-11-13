@@ -13,11 +13,18 @@
     "total_tokens": 20476
   },
   "editing": "Revised through agy to show all three modes; updated reveal to an original stretching-arm headpat example at user request. Codex corrected metadata-cleaning wording and scoped the seam claim to measured results.",
-  "article_sha256": "524310069606d33d99330357a52f968fef7619af0ccf54d1dd4d31e096abecb9",
+  "article_sha256": "d70702799724f95d70bcff0608fd2a7940f6424e52617ffcbea28966913c35e3",
   "review": {
     "facts_checked_against": "research.md and validation.json",
     "external_article_publication": false,
     "scope": "Public Skill launch article; no invented reach or revenue"
   },
-  "previous_article_sha256": "9e6480e833b5d5570681186211c380b2f8364b02beab8ad0a8694cd1cfe0a1b1"
+  "previous_article_sha256": "9e6480e833b5d5570681186211c380b2f8364b02beab8ad0a8694cd1cfe0a1b1",
+  "cover": {
+    "file": "docs/assets/launch-cover.png",
+    "selected_candidate": 6,
+    "width": 2500,
+    "height": 1000,
+    "privacy_skill_completed": true
+  }
 }

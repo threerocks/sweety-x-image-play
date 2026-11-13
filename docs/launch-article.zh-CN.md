@@ -1,5 +1,7 @@
 # 用 AI 做 X 多图长条、连续切片与横滑揭晓：开源 Skill `sweety-x-image-play` 发布
 
+![X 多图创作 Skill：独立窄条、连续切片与横滑揭晓](https://raw.githubusercontent.com/threerocks/sweety-x-image-play/main/docs/assets/launch-cover.png)
+
 `sweety-x-image-play` 是一个面向 X（Twitter）多图玩法的开源 Skill，现已发布在 GitHub：[https://github.com/threerocks/sweety-x-image-play](https://github.com/threerocks/sweety-x-image-play)。它由 Skill 工作流规范和本地确定性 Python 脚本组成，支持 **2–20 张**切片导出：在支持生图的 AI 助手环境里，可以用自然语言生成并导出独立窄条、连续长图和横滑揭晓组图；如果手头已经有现成横图或素材，也可以跳过生图步骤，直接用脚本完成精确裁切、中段延展、排序打包与结果校验。
 
 靠纯提示词直接让图像模型输出多张首尾相连或超细窄条的图片，通常难以控制精确像素宽高、边缘对齐与顺序编号。这个 Skill 把「构图与生图」交给 AI，把「像素计算、拼接校验与文件输出」交给本地脚本，目前已收录覆盖三种模式的 5 组公开示例（下文三组代表样例，加上早前同属连续切片模式的「机器人与猫咪」与「云中游龙」各 20 张，共计 84 张）。
