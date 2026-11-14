@@ -14,6 +14,8 @@ import sys
 import tempfile
 import zipfile
 
+from breakout import compose_master, resolve_layout
+
 MAX_IMAGES = 20
 MAX_TOTAL_PIXELS = 80_000_000
 SOURCE_XATTRS = ('com.apple.metadata:kMDItemWhereFroms', 'com.apple.quarantine')
@@ -55,12 +57,20 @@ def load_json(path):
 
 
 def validate_shape(plan):
-    for key in ('count', 'width', 'height'):
+    for key in ('count', 'height'):
         require(type(plan.get(key)) is int and plan[key] > 0, f'{key} must be a positive integer.')
     require(2 <= plan['count'] <= MAX_IMAGES, 'This exporter supports 2–20 independent images.')
-    require(plan['count'] * plan['width'] * plan['height'] <= MAX_TOTAL_PIXELS,
+    if plan.get('mode') == 'breakout':
+        widths = plan.get('widths')
+        require(isinstance(widths, list) and len(widths) == plan['count'] and
+                all(type(n) is int and n > 0 for n in widths), 'Invalid breakout widths.')
+        total_width = sum(widths)
+    else:
+        require(type(plan.get('width')) is int and plan['width'] > 0, 'width must be a positive integer.')
+        total_width = plan['count'] * plan['width']
+    require(total_width * plan['height'] <= MAX_TOTAL_PIXELS,
             'Requested set exceeds the 80 million pixel local processing budget.')
-    require(plan.get('mode') in ('independent', 'panorama', 'reveal'), 'Unknown mode.')
+    require(plan.get('mode') in ('independent', 'panorama', 'reveal', 'breakout'), 'Unknown mode.')
     require(plan.get('fit', 'exact') in ('exact', 'contain', 'cover'), 'Unknown fit policy.')
 
 
@@ -138,6 +148,8 @@ def edge_error(left_path, right_path, height):
 def build(plan_path, destination):
     plan_path, destination = Path(plan_path).resolve(), Path(destination).resolve()
     plan = load_json(plan_path)
+    if plan.get('mode') == 'breakout':
+        plan = resolve_layout(plan, plan_path.parent, magick, dimensions, resolve_source, require)
     validate_shape(plan)
     require(not destination.exists(), f'Output already exists; use a new version: {destination}')
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -148,7 +160,19 @@ def build(plan_path, destination):
         image_directory.mkdir(parents=True)
         image_paths = [image_directory / f'{index:02}.png' for index in range(1, plan['count']+1)]
         reconstruction_matches = None
-        if plan['mode'] == 'panorama':
+        breakout_report = None
+        if plan['mode'] == 'breakout':
+            master, breakout_report = compose_master(plan, plan_path.parent, scratch, magick,
+                                                     dimensions, resolve_source, require)
+            offset = 0
+            for panel_width, path in zip(plan['widths'], image_paths):
+                magick(master, '-crop', f"{panel_width}x{plan['height']}+{offset}+0", '+repage', '-strip', path)
+                offset += panel_width
+            reconstructed = scratch / 'reconstructed.png'
+            magick(*image_paths, '+append', '-strip', reconstructed)
+            reconstruction_matches = pixel_digest(master) == pixel_digest(reconstructed)
+            require(reconstruction_matches, 'Breakout slices differ from the composed master.')
+        elif plan['mode'] == 'panorama':
             master_plan = dict(plan, width=plan['width'] * plan['count'])
             master = scratch / 'master.png'
             prepare_frame(plan.get('source'), master, master_plan, plan_path.parent, scratch)
@@ -170,15 +194,18 @@ def build(plan_path, destination):
         frames = []
         for index, path in enumerate(image_paths, 1):
             frames.append({'index': index, 'file': f'images/{path.name}',
-                           'width': plan['width'], 'height': plan['height'],
+                           'width': dimensions(path)[0], 'height': plan['height'],
                            'pixels_sha256': pixel_digest(path)})
         manifest = {'schema_version': 1, 'mode': plan['mode'], 'count': plan['count'],
-                    'width': plan['width'], 'height': plan['height'], 'frames': frames,
+                    'width': plan.get('width'), 'height': plan['height'], 'frames': frames,
                     'panorama_reconstruction_matches': reconstruction_matches,
                     'edge_mae': [edge_error(a, b, plan['height']) for a, b in zip(image_paths, image_paths[1:])],
                     'privacy_skill': 'pending', 'x_client_verified': False,
                     'notes': ['Edge errors are diagnostic only; inspect thin connecting lines visually.',
                               'Preview is a local simulation, not an X client verification.']}
+        if breakout_report:
+            manifest.update(schema_version=2, widths=plan['widths'], breakout=breakout_report)
+            manifest['notes'].append('Transparent gaps are inside attachments; real client gutters remain uncovered.')
         write_json(staged / 'manifest.json', manifest)
         finalize(staged, initial=True)
         staged.rename(destination)
@@ -194,10 +221,11 @@ def checked_files(folder, manifest):
     observed = sorted(path.relative_to(folder).as_posix() for path in (folder / 'images').iterdir())
     require(observed == expected, 'Image folder contains missing or extra files.')
     paths = [folder / name for name in expected]
-    for path, frame in zip(paths, manifest['frames']):
+    expected_widths = manifest['widths'] if manifest['mode'] == 'breakout' else [manifest['width']] * manifest['count']
+    for path, frame, expected_width in zip(paths, manifest['frames'], expected_widths):
         require(path.is_file() and not path.is_symlink(), 'Exported images must be ordinary files.')
-        require(dimensions(path) == (manifest['width'], manifest['height']), f'Wrong dimensions: {path.name}')
-        require((frame['width'], frame['height']) == (manifest['width'], manifest['height']),
+        require(dimensions(path) == (expected_width, manifest['height']), f'Wrong dimensions: {path.name}')
+        require((frame['width'], frame['height']) == (expected_width, manifest['height']),
                 'Frame dimensions do not match the set specification.')
         require(pixel_digest(path) == frame['pixels_sha256'], f'Image pixels changed: {path.name}; rebuild.')
     return paths
@@ -295,6 +323,7 @@ def audit(folder):
             require(archive.read(path.name) == payload, f'ZIP contains a different image: {path.name}')
     return {'file_checks_passed': True, 'count': manifest['count'],
             'width': manifest['width'], 'height': manifest['height'],
+            'widths': [frame['width'] for frame in manifest['frames']],
             'privacy_workflow_complete': manifest.get('privacy_skill') == 'completed',
             'privacy_skill': manifest.get('privacy_skill'), 'x_client_verified': False,
             'output': str(folder)}
@@ -315,15 +344,17 @@ def write_preview(folder, manifest):
 .strip{display:flex;gap:6px;width:max-content;align-items:stretch}.strip img{height:560px;width:auto;display:block;border-radius:6px;flex:none}
 label,button{margin-right:16px}nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}a{color:#135dc0}p{line-height:1.6}</style>
 <h1>X 多图模拟预览</h1><p>本地模拟，不代表 X 客户端已验证。图片保持独立；横向滑动查看终点。</p>
-<p>MODE · COUNT 张 · 每张 WIDTH×HEIGHT 像素</p>
+<p>MODE · COUNT 张 · 高 HEIGHT 像素；各张宽度见下载链接</p>
 <p><label>显示高度 <input id="height" type="range" min="240" max="900" value="560"></label>
 <label>间距 <input id="gap" type="range" min="0" max="16" value="6"></label>
+<label>背景 <select id="theme"><option value="#fff">浅色</option><option value="#000">黑色</option><option value="#15202b">深蓝</option></select></label>
 <button id="end">滑到末尾</button><button id="start">回到开头</button></p>
 <div class="viewport"><div class="strip">TILES</div></div><nav>LINKS</nav>
 <p><a href="images.zip" download>下载全部独立图片</a> · <a href="manifest.json">查看实际文件清单</a></p>
 <script>const viewport=document.querySelector('.viewport'),strip=document.querySelector('.strip');
 document.querySelector('#height').oninput=e=>strip.querySelectorAll('img').forEach(i=>i.style.height=e.target.value+'px');
 document.querySelector('#gap').oninput=e=>strip.style.gap=e.target.value+'px';
+document.querySelector('#theme').onchange=e=>viewport.style.background=e.target.value;
 document.querySelector('#end').onclick=()=>viewport.scrollTo({left:viewport.scrollWidth,behavior:'smooth'});
 document.querySelector('#start').onclick=()=>viewport.scrollTo({left:0,behavior:'smooth'});</script></html>'''
     for placeholder, value in [('MODE', manifest['mode']), ('COUNT', str(manifest['count'])),

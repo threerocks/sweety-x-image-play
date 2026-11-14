@@ -150,6 +150,93 @@ class ExportTests(unittest.TestCase):
             self.build_set({'mode': 'independent', 'count': 21, 'width': 40, 'height': 1920,
                             'assets': [str(source)] * 21})
 
+    def breakout_plan(self, left=30, right=69, count=5):
+        source = self.root / 'scene.png'
+        mask = self.root / 'mask.png'
+        exporter.magick('-size', '120x80', 'gradient:#f08424-#234f92', '-strip', source)
+        exporter.magick('-size', '120x80', 'xc:black', '-fill', 'white',
+                       '-draw', f'rectangle {left},20 {right},59', '-strip', mask)
+        return {'mode': 'breakout', 'source': str(source), 'foreground_mask': str(mask),
+                'count': count, 'bar_width': 12, 'gap_width': 3, 'corner_radius': 2}
+
+    def test_breakout_preserves_foreground_and_transparency_through_finalize(self):
+        plan = self.breakout_plan()
+        source_digest = exporter.pixel_digest(plan['source'])
+        destination = self.build_set(plan)
+        manifest = exporter.load_json(destination / 'manifest.json')
+        self.assertEqual(sum(manifest['widths']), 120)
+        self.assertTrue(manifest['panorama_reconstruction_matches'])
+        self.assertTrue(manifest['breakout']['foreground_pixels_preserved'])
+        joined = self.root / 'joined.png'
+        exporter.magick(*sorted((destination / 'images').glob('*.png')), '+append', joined)
+        original = exporter.magick(plan['source'], '-depth', '8', 'rgba:-')
+        actual = exporter.magick(joined, '-depth', '8', 'rgba:-')
+        for y in range(20, 60):
+            for x in range(30, 70):
+                offset = 4 * (120 * y + x)
+                self.assertEqual(actual[offset:offset+4], original[offset:offset+4])
+        self.assertEqual(actual[4 * (10 * 120 + 13) + 3], 0)
+        self.assertEqual(actual[4 * (10 * 120 + 6) + 3], 255)
+        before = [frame['pixels_sha256'] for frame in manifest['frames']]
+        exporter.finalize(destination, privacy_unavailable=True)
+        after = exporter.load_json(destination / 'manifest.json')
+        self.assertEqual(before, [frame['pixels_sha256'] for frame in after['frames']])
+        self.assertEqual(exporter.pixel_digest(plan['source']), source_digest)
+
+    def test_breakout_layout_follows_left_and_right_subject(self):
+        left = self.build_set(self.breakout_plan(5, 34), 'left')
+        right = self.build_set(self.breakout_plan(85, 114), 'right')
+        left_widths = exporter.audit(left)['widths']
+        right_widths = exporter.audit(right)['widths']
+        self.assertEqual(left_widths[0], right_widths[-1])
+        self.assertEqual(sorted(left_widths[1:]), sorted(right_widths[:-1]))
+        self.assertGreater(left_widths[0], max(left_widths[1:]))
+        self.assertGreater(right_widths[-1], max(right_widths[:-1]))
+
+    def test_breakout_wide_foreground_changes_layout_and_honors_count(self):
+        destination = self.build_set(self.breakout_plan(15, 104, count=3))
+        widths = exporter.audit(destination)['widths']
+        self.assertEqual(len(widths), 3)
+        self.assertGreaterEqual(widths[1], 90)
+        self.assertEqual(sum(widths), 120)
+
+    def test_breakout_rejects_cuts_through_foreground_and_invalid_widths(self):
+        for widths in ([20, 20, 20, 20, 40], [5, 5, 5, 5, 5]):
+            plan = self.breakout_plan()
+            plan['widths'] = widths
+            with self.assertRaises(ValueError):
+                self.build_set(plan)
+            self.assertFalse((self.root / 'output').exists())
+
+    def test_breakout_rejects_empty_or_misaligned_mask(self):
+        plan = self.breakout_plan()
+        for size in ('120x80', '119x80'):
+            exporter.magick('-size', size, 'xc:black', plan['foreground_mask'])
+            with self.assertRaises(ValueError):
+                self.build_set(plan)
+
+    def test_breakout_does_not_force_twenty_panels_or_cut_full_width_subject(self):
+        plan = self.breakout_plan(0, 119)
+        with self.assertRaisesRegex(ValueError, 'Not enough background'):
+            self.build_set(plan)
+        plan = self.breakout_plan(15, 104, count=20)
+        plan['min_panel_width'] = 10
+        with self.assertRaisesRegex(ValueError, 'Not enough background'):
+            self.build_set(plan)
+
+    def test_breakout_honors_explicit_unequal_widths(self):
+        plan = self.breakout_plan()
+        plan['widths'] = [10, 15, 50, 20, 25]
+        destination = self.build_set(plan)
+        self.assertEqual(exporter.audit(destination)['widths'], plan['widths'])
+
+    def test_breakout_preserves_existing_source_alpha(self):
+        plan = self.breakout_plan()
+        exporter.magick('-size', '120x80', 'xc:rgba(180,120,60,0.5)', plan['source'])
+        destination = self.build_set(plan)
+        report = exporter.load_json(destination / 'manifest.json')['breakout']
+        self.assertTrue(report['foreground_pixels_preserved'])
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
