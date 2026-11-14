@@ -165,12 +165,26 @@ def build(plan_path, destination):
             master, breakout_report = compose_master(plan, plan_path.parent, scratch, magick,
                                                      dimensions, resolve_source, require)
             offset = 0
-            for panel_width, path in zip(plan['widths'], image_paths):
+            pieces = []
+            for index, (panel_width, path) in enumerate(zip(plan['widths'], image_paths)):
+                if plan['layout'] == 'hybrid':
+                    offset = plan['_crop_ranges'][index][0]
                 magick(master, '-crop', f"{panel_width}x{plan['height']}+{offset}+0", '+repage', '-strip', path)
+                pieces.append(path)
                 offset += panel_width
+                if plan['layout'] == 'hybrid' and index < len(image_paths) - 1:
+                    spacer = scratch / f'gap-{index}.png'
+                    magick('-size', f"{plan['gap_width']}x{plan['height']}", 'xc:none', spacer)
+                    pieces.append(spacer)
             reconstructed = scratch / 'reconstructed.png'
-            magick(*image_paths, '+append', '-strip', reconstructed)
-            reconstruction_matches = pixel_digest(master) == pixel_digest(reconstructed)
+            magick(*pieces, '+append', '-strip', reconstructed)
+            if plan['layout'] == 'hybrid':
+                # Transparent RGB is unobservable; real gutters replace those source columns.
+                def visible_pixels(path):
+                    return magick(path, '-background', 'black', '-alpha', 'background', '-depth', '8', 'rgba:-')
+                reconstruction_matches = visible_pixels(master) == visible_pixels(reconstructed)
+            else:
+                reconstruction_matches = pixel_digest(master) == pixel_digest(reconstructed)
             require(reconstruction_matches, 'Breakout slices differ from the composed master.')
         elif plan['mode'] == 'panorama':
             master_plan = dict(plan, width=plan['width'] * plan['count'])
@@ -361,6 +375,16 @@ document.querySelector('#start').onclick=()=>viewport.scrollTo({left:0,behavior:
                                ('WIDTH', str(manifest['width'])), ('HEIGHT', str(manifest['height'])),
                                ('TILES', ''.join(tiles)), ('LINKS', ''.join(links))]:
         document = document.replace(placeholder, value)
+    if manifest.get('breakout', {}).get('layout') == 'hybrid':
+        report = manifest['breakout']
+        calibrated_gap = 560 * report['gap_width'] / manifest['height']
+        document = document.replace('gap:6px;', f'gap:{calibrated_gap}px;')
+        document = document.replace('max="16" value="6"', f'max="32" step="0.01" value="{calibrated_gap}"')
+        document = document.replace('图片保持独立；横向滑动查看终点。',
+            f"{report['column_count']} 个等宽视觉栏，{manifest['count']} 个附件；主体在第 {report['main_attachment']} 张宽附件内。初始间距按栏缝比例模拟，并非 X 实测。")
+        original_handler = "document.querySelector('#height').oninput=e=>strip.querySelectorAll('img').forEach(i=>i.style.height=e.target.value+'px');"
+        replacement = "document.querySelector('#height').oninput=e=>{strip.querySelectorAll('img').forEach(i=>i.style.height=e.target.value+'px');const gap=e.target.value*GAP/HEIGHT;strip.style.gap=gap+'px';document.querySelector('#gap').value=gap;};"
+        document = document.replace(original_handler, replacement.replace('GAP', str(report['gap_width'])).replace('HEIGHT', str(manifest['height'])))
     (folder / 'preview.html').write_text(document, encoding='utf8')
 
 

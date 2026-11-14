@@ -9,8 +9,8 @@ def resolve_layout(plan, directory, magick, dimensions, resolve_source, require)
     require(dimensions(mask) == (width, height), 'Foreground mask must match the source dimensions.')
     require(plan.get('fit', 'exact') == 'exact', 'Prepare source and mask together; breakout uses exact pixels.')
     require(plan.get('height', height) == height, 'Breakout height must match the source.')
-    layout = plan.get('layout', 'uniform')
-    require(layout in ('uniform', 'adaptive'), 'layout must be uniform or adaptive.')
+    layout = plan.get('layout', 'hybrid')
+    require(layout in ('hybrid', 'uniform', 'adaptive'), 'layout must be hybrid, uniform or adaptive.')
     mask_pixels = magick(mask, '-background', 'black', '-alpha', 'remove', '-alpha', 'off',
                          '-colorspace', 'gray', '-depth', '8', 'gray:-')
     columns = [False] * width
@@ -23,6 +23,37 @@ def resolve_layout(plan, directory, magick, dimensions, resolve_source, require)
     occupied = [x for x, selected in enumerate(columns) if selected]
     require(occupied, 'Foreground mask is empty; select a meaningful subject first.')
     bounds = [occupied[0], min_y, occupied[-1] + 1, max_y + 1]
+    if layout == 'hybrid':
+        column_count = plan.get('column_count', 20)
+        column_width = plan.get('column_width', 80)
+        gap = plan.get('gap_width', 8)
+        require(type(column_count) is int and 2 <= column_count <= 100, 'column_count must be 2–100.')
+        require(type(column_width) is int and column_width > 0 and type(gap) is int and gap > 0,
+                'column_width and gap_width must be positive integers.')
+        require(not any(key in plan for key in ('width', 'widths', 'bar_width')),
+                'Hybrid layout uses column_width; attachment widths are derived from the shared grid.')
+        pitch = column_width + gap
+        require(width == column_count * column_width + (column_count - 1) * gap,
+                'Prepare source and mask at column_count * column_width + (column_count - 1) * gap_width.')
+        padding = plan.get('subject_padding', 0)
+        require(type(padding) is int and padding >= 0, 'subject_padding must be nonnegative.')
+        first = max(0, bounds[0] - padding) // pitch
+        last = min(width - 1, bounds[2] - 1 + padding) // pitch
+        if min(width, bounds[2] + padding) > last * pitch + column_width:
+            last += 1
+        groups = [(i, i) for i in range(first)] + [(first, last)]
+        groups += [(i, i) for i in range(last + 1, column_count)]
+        require(2 <= len(groups) <= 20,
+                'Hybrid grid needs 2–20 attachments; adjust composition or column_count, never cut the subject.')
+        require('count' not in plan or plan['count'] == len(groups),
+                'count is actual attachments, not visible columns; omit count or use the derived value.')
+        crops = [[a * pitch, (b - a + 1) * column_width + (b - a) * gap] for a, b in groups]
+        return dict(plan, layout=layout, count=len(groups), height=height,
+                    widths=[crop[1] for crop in crops], column_count=column_count,
+                    column_width=column_width, bar_width=column_width, gap_width=gap,
+                    _source_width=width, _crop_ranges=crops, _foreground_bounds=bounds,
+                    _subject_cut_positions=[], _main_columns=[first, last],
+                    _main_attachment=first + 1)
     count = plan.get('count', 20)
     require(type(count) is int and 2 <= count <= 20, 'Breakout requires 2–20 attachments.')
     widths = plan.get('widths')
@@ -77,7 +108,7 @@ def resolve_layout(plan, directory, magick, dimensions, resolve_source, require)
 
 
 def compose_master(plan, directory, scratch, magick, dimensions, resolve_source, require):
-    width, height = sum(plan['widths']), plan['height']
+    width, height = plan.get('_source_width', sum(plan['widths'])), plan['height']
     source = resolve_source(plan['source'], directory)
     mask = resolve_source(plan['foreground_mask'], directory)
     if plan['layout'] == 'uniform':
@@ -124,4 +155,9 @@ def compose_master(plan, directory, scratch, magick, dimensions, resolve_source,
               'fully_protected_pixels': protected_count, 'foreground_pixels_preserved': preserved,
               'transparent_pixels': transparent_count,
               'subject_selection': 'author-supplied mask; not automatic semantic detection'}
+    if plan['layout'] == 'hybrid':
+        report.update(column_count=plan['column_count'], column_width=plan['column_width'],
+                      main_columns=plan['_main_columns'], main_attachment=plan['_main_attachment'],
+                      crop_ranges=plan['_crop_ranges'], source_width=width,
+                      real_gaps_baked_into_files=False)
     return master, report

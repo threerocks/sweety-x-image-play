@@ -237,13 +237,14 @@ class ExportTests(unittest.TestCase):
         report = exporter.load_json(destination / 'manifest.json')['breakout']
         self.assertTrue(report['foreground_pixels_preserved'])
 
-    def test_breakout_defaults_to_twenty_equal_eighty_pixel_panels(self):
+    def test_breakout_explicit_uniform_has_twenty_equal_eighty_pixel_panels(self):
         plan = self.breakout_plan()
-        for key in ('count', 'layout', 'bar_width', 'gap_width'):
+        for key in ('count', 'bar_width', 'gap_width'):
             del plan[key]
         exporter.magick('-size', '1600x80', 'gradient:red-blue', plan['source'])
         exporter.magick('-size', '1600x80', 'xc:black', '-fill', 'white',
                        '-draw', 'rectangle 510,20 1000,59', plan['foreground_mask'])
+        plan['layout'] = 'uniform'
         destination = self.build_set(plan)
         report = exporter.audit(destination)
         self.assertEqual(report['widths'], [80] * 20)
@@ -257,7 +258,7 @@ class ExportTests(unittest.TestCase):
 
     def test_breakout_uniform_rejects_wrong_canvas_and_unequal_widths(self):
         plan = self.breakout_plan()
-        del plan['layout']
+        plan['layout'] = 'uniform'
         with self.assertRaisesRegex(ValueError, 'Prepare both at the same scale'):
             self.build_set(plan)
         plan['width'] = 24
@@ -270,6 +271,43 @@ class ExportTests(unittest.TestCase):
         plan.update(layout='uniform', width=24, allow_subject_cuts=False)
         with self.assertRaisesRegex(ValueError, 'cut crosses'):
             self.build_set(plan)
+
+    def test_hybrid_preserves_subject_in_one_attachment_and_matches_column_grid(self):
+        source = self.make_image('grid-source.png', '1752x80')
+        mask = self.make_image('grid-mask.png', '1752x80', 'black')
+        exporter.magick(mask, '-fill', 'white', '-draw', 'rectangle 520,20 1030,59', mask)
+        destination = self.build_set({'mode': 'breakout', 'source': str(source), 'foreground_mask': str(mask)})
+        manifest = exporter.load_json(destination / 'manifest.json')
+        report = manifest['breakout']
+        self.assertEqual(report['layout'], 'hybrid')
+        self.assertEqual(report['column_count'], 20)
+        self.assertEqual(report['main_columns'], [5, 11])
+        self.assertEqual(manifest['widths'], [80] * 5 + [608] + [80] * 8)
+        self.assertEqual(manifest['count'], 14)
+        self.assertEqual(report['subject_cut_positions'], [])
+        self.assertTrue(manifest['panorama_reconstruction_matches'])
+        self.assertTrue(report['foreground_pixels_preserved'])
+        # A real narrow attachment has no baked-in full-height side gap.
+        alpha = exporter.magick(destination / 'images/01.png', '-alpha', 'extract', '-depth', '8', 'gray:-')
+        self.assertEqual(alpha[40 * 80:41 * 80], bytes([255]) * 80)
+        # The same grid gap exists above the subject but is occluded within it.
+        main = exporter.magick(destination / 'images/06.png', '-depth', '8', 'rgba:-')
+        self.assertEqual(main[4 * (10 * 608 + 84) + 3], 0)
+        self.assertEqual(main[4 * (40 * 608 + 84) + 3], 255)
+
+    def test_hybrid_rejects_attachment_count_confused_with_columns(self):
+        source = self.make_image('scene.png', '1752x80')
+        mask = self.make_image('mask.png', '1752x80', 'black')
+        exporter.magick(mask, '-fill', 'white', '-draw', 'rectangle 520,20 1030,59', mask)
+        plan = {'mode': 'breakout', 'source': str(source), 'foreground_mask': str(mask), 'count': 20}
+        with self.assertRaisesRegex(ValueError, 'actual attachments'):
+            self.build_set(plan)
+
+    def test_hybrid_refuses_full_width_subject_instead_of_cutting_it(self):
+        source = self.make_image('scene.png', '1752x80')
+        mask = self.make_image('mask.png', '1752x80', 'white')
+        with self.assertRaisesRegex(ValueError, 'never cut the subject'):
+            self.build_set({'mode': 'breakout', 'source': str(source), 'foreground_mask': str(mask)})
 
 
 if __name__ == '__main__':
