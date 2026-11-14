@@ -57,25 +57,35 @@ exact 要求母图为 2800×2048。`contain` 等比完整保留并补背景，�
 
 ## 主体出框
 
+默认方案（先将母图和蒙版等比准备到 1600 px 总宽）：
+
 ```json
 {
   "mode": "breakout",
-  "source": "original.png",
-  "foreground_mask": "subject-mask.png",
-  "count": 5,
-  "bar_width": 80,
+  "layout": "uniform",
+  "source": "prepared-original.png",
+  "foreground_mask": "prepared-mask.png",
+  "count": 20,
+  "width": 80,
+  "bar_width": 72,
   "gap_width": 8,
   "corner_radius": 12
 }
 ```
 
-数值仅为示例，应根据原图确定。原图与蒙版严格同尺寸；无裁剪、缩放或重绘。白色蒙版保护前景，黑色区域接受透明条缝，灰色可柔化边缘。源图已有透明度也会保留。
+`count` 默认 20，`width` 默认 80，可按用户要求修改。总宽必须恰好等于 count × width；源图与蒙版必须同尺寸。脚本不会静默缩放、裁边、拉伸各片或将余数分给最后一片。`height` 可省略，填写时须与准备后的母图相同；仅支持 `fit: exact`。先准备整张母图与蒙版，例如原图按 1600 px 宽等比缩放，再将蒙版配准到相同宽高；像素保留检查相对于准备后的母图，不能据此声称与未缩放原图逐像素相同。
 
-省略 `widths` 时自动根据蒙版横向范围安排宽主体附件与左右窄片，主图位置随主体而变。可选 `subject_padding`（非负像素）、`min_panel_width`（正像素）控制余量与外围最小宽度。布局空间不足会失败，不能强行凑 20 张。没有指定 count 时默认 5，作者仍需先按构图决定数量。
+白色保留目标，黑色允许图内透明条缝，灰色用于边缘过渡。目标选择必须先通过语义检查：手握石头不意味着把手并入石头。需要保护文字时先单独验收主角蒙版，再合并独立的文字保护层用于导出。
 
-手动布局可写 `widths: [53, 64, 62, 510, 47]`（仅为 736 像素母图示例，不能照抄到其他图）。长度须等于 count，总和须等于原图宽；所有实际切口必须避开蒙版覆盖的整个横向跨度。不要写旧模式的 `width`；`height` 可省略，填写时必须等于原图高度。只支持 `fit: exact`。
+默认背景条框与附件同为 80 px 节距，72 px 图像条 + 8 px 透明缝；整套使用统一条宽、间距与圆角。生成模型不负责保证最终像素尺寸。
 
-此模式的 manifest 使用 schema_version 2、`width: null` 和逐张 `widths`；其他模式维持旧格式。记录前景范围、白色保护区域像素检查和透明像素数；重组必须等于合成后的母图。PNG 可同时适应浅/深背景，preview.html 提供三种底色切换；这不证明 X 客户端一定按相同比例排列。
+`uniform` 允许等宽切口穿过目标，并在 `breakout.subject_cut_positions` 记录位于目标横向范围内的切口（保守范围，不是逐行语义判定）。这不改变文件重组结果，但 X 的真实附件间距仍可分隔主体。若用户要求真实切口不得穿过目标，设置 `allow_subject_cuts: false`；冲突时停止，不自动回退到不等宽。
+
+### 历史不等宽选项
+
+只有用户明确选用时才设置 `layout: adaptive`。省略 widths 时按蒙版范围安排宽主图与外围窄片；可用 `subject_padding`、`min_panel_width` 调整。也可显式传入各张 widths；长度须等于 count，总和须等于母图宽。此布局不接受 width，默认不允许切口穿过目标范围。旧方案需补上 `layout: adaptive` 和原 count 才能按原方式复现。
+
+breakout 清单使用 schema_version 2 和逐张 widths；uniform 的 width 为单张实际宽度，adaptive 的 width 为 null。重组必须等于合成母图；preview.html 支持浅色、黑色、深蓝背景。所有检查均不代表目标 X 客户端发布效果已验证。
 
 ## 交付检查
 

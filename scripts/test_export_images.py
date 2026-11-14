@@ -156,7 +156,7 @@ class ExportTests(unittest.TestCase):
         exporter.magick('-size', '120x80', 'gradient:#f08424-#234f92', '-strip', source)
         exporter.magick('-size', '120x80', 'xc:black', '-fill', 'white',
                        '-draw', f'rectangle {left},20 {right},59', '-strip', mask)
-        return {'mode': 'breakout', 'source': str(source), 'foreground_mask': str(mask),
+        return {'mode': 'breakout', 'layout': 'adaptive', 'source': str(source), 'foreground_mask': str(mask),
                 'count': count, 'bar_width': 12, 'gap_width': 3, 'corner_radius': 2}
 
     def test_breakout_preserves_foreground_and_transparency_through_finalize(self):
@@ -236,6 +236,40 @@ class ExportTests(unittest.TestCase):
         destination = self.build_set(plan)
         report = exporter.load_json(destination / 'manifest.json')['breakout']
         self.assertTrue(report['foreground_pixels_preserved'])
+
+    def test_breakout_defaults_to_twenty_equal_eighty_pixel_panels(self):
+        plan = self.breakout_plan()
+        for key in ('count', 'layout', 'bar_width', 'gap_width'):
+            del plan[key]
+        exporter.magick('-size', '1600x80', 'gradient:red-blue', plan['source'])
+        exporter.magick('-size', '1600x80', 'xc:black', '-fill', 'white',
+                       '-draw', 'rectangle 510,20 1000,59', plan['foreground_mask'])
+        destination = self.build_set(plan)
+        report = exporter.audit(destination)
+        self.assertEqual(report['widths'], [80] * 20)
+        manifest = exporter.load_json(destination / 'manifest.json')
+        self.assertEqual(manifest['breakout']['layout'], 'uniform')
+        self.assertEqual(manifest['breakout']['bar_width'], 72)
+        self.assertEqual(manifest['breakout']['gap_width'], 8)
+        self.assertTrue(manifest['breakout']['subject_cut_positions'])
+        self.assertTrue(manifest['breakout']['foreground_pixels_preserved'])
+        self.assertTrue(manifest['panorama_reconstruction_matches'])
+
+    def test_breakout_uniform_rejects_wrong_canvas_and_unequal_widths(self):
+        plan = self.breakout_plan()
+        del plan['layout']
+        with self.assertRaisesRegex(ValueError, 'Prepare both at the same scale'):
+            self.build_set(plan)
+        plan['width'] = 24
+        plan['widths'] = [20, 20, 20, 20, 40]
+        with self.assertRaisesRegex(ValueError, 'rejects unequal widths'):
+            self.build_set(plan)
+
+    def test_breakout_uniform_respects_explicit_no_subject_cuts(self):
+        plan = self.breakout_plan()
+        plan.update(layout='uniform', width=24, allow_subject_cuts=False)
+        with self.assertRaisesRegex(ValueError, 'cut crosses'):
+            self.build_set(plan)
 
 
 if __name__ == '__main__':

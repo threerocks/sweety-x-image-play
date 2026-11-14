@@ -9,7 +9,8 @@ def resolve_layout(plan, directory, magick, dimensions, resolve_source, require)
     require(dimensions(mask) == (width, height), 'Foreground mask must match the source dimensions.')
     require(plan.get('fit', 'exact') == 'exact', 'Prepare source and mask together; breakout uses exact pixels.')
     require(plan.get('height', height) == height, 'Breakout height must match the source.')
-    require('width' not in plan, 'Use widths for breakout, not a uniform width.')
+    layout = plan.get('layout', 'uniform')
+    require(layout in ('uniform', 'adaptive'), 'layout must be uniform or adaptive.')
     mask_pixels = magick(mask, '-background', 'black', '-alpha', 'remove', '-alpha', 'off',
                          '-colorspace', 'gray', '-depth', '8', 'gray:-')
     columns = [False] * width
@@ -22,9 +23,20 @@ def resolve_layout(plan, directory, magick, dimensions, resolve_source, require)
     occupied = [x for x, selected in enumerate(columns) if selected]
     require(occupied, 'Foreground mask is empty; select a meaningful subject first.')
     bounds = [occupied[0], min_y, occupied[-1] + 1, max_y + 1]
-    count = plan.get('count', 5)
+    count = plan.get('count', 20)
     require(type(count) is int and 2 <= count <= 20, 'Breakout requires 2–20 attachments.')
     widths = plan.get('widths')
+    if layout == 'uniform':
+        panel_width = plan.get('width', 80)
+        require(type(panel_width) is int and panel_width > 0, 'width must be a positive integer.')
+        require(width == count * panel_width,
+                f'Uniform layout needs a {count * panel_width}px-wide source and matching mask. '
+                'Prepare both at the same scale first; do not stretch individual slices.')
+        if widths is not None:
+            require(widths == [panel_width] * count, 'Uniform layout rejects unequal widths.')
+        widths = [panel_width] * count
+    else:
+        require('width' not in plan, 'Adaptive layout uses widths, not width.')
     if widths is None:
         padding = plan.get('subject_padding', max(1, round(width * .015)))
         minimum = plan.get('min_panel_width', max(1, width // 100))
@@ -51,10 +63,16 @@ def resolve_layout(plan, directory, magick, dimensions, resolve_source, require)
         position += panel_width
         cuts.append(position)
     # Real attachment gutters cannot be covered by pixels in another attachment.
-    require(all(not bounds[0] < cut < bounds[2] for cut in cuts),
-            'An attachment cut crosses the protected foreground span. Keep it in one wide panel.')
-    resolved = dict(plan, count=count, height=height, widths=widths)
+    subject_cuts = [cut for cut in cuts if bounds[0] < cut < bounds[2]]
+    allow_subject_cuts = plan.get('allow_subject_cuts', layout == 'uniform')
+    require(type(allow_subject_cuts) is bool, 'allow_subject_cuts must be boolean.')
+    require(allow_subject_cuts or not subject_cuts,
+            'An attachment cut crosses the protected foreground span. Choose a compatible composition or explicitly change the layout.')
+    resolved = dict(plan, count=count, height=height, widths=widths, layout=layout)
+    if layout == 'uniform':
+        resolved['width'] = panel_width
     resolved['_foreground_bounds'] = bounds
+    resolved['_subject_cut_positions'] = subject_cuts
     return resolved
 
 
@@ -62,8 +80,12 @@ def compose_master(plan, directory, scratch, magick, dimensions, resolve_source,
     width, height = sum(plan['widths']), plan['height']
     source = resolve_source(plan['source'], directory)
     mask = resolve_source(plan['foreground_mask'], directory)
-    bar_width = plan.get('bar_width', max(2, round(width / 12)))
-    gap_width = plan.get('gap_width', max(1, round(bar_width * .10)))
+    if plan['layout'] == 'uniform':
+        gap_width = plan.get('gap_width', max(1, round(plan['width'] * .10)))
+        bar_width = plan.get('bar_width', plan['width'] - gap_width)
+    else:
+        bar_width = plan.get('bar_width', max(2, round(width / 12)))
+        gap_width = plan.get('gap_width', max(1, round(bar_width * .10)))
     radius = plan.get('corner_radius', min(bar_width // 2, gap_width * 2))
     require(type(bar_width) is int and 1 <= bar_width < width, 'bar_width must be smaller than the source width.')
     require(type(gap_width) is int and 1 <= gap_width < width, 'gap_width must be positive and smaller than the source.')
@@ -95,7 +117,9 @@ def compose_master(plan, directory, scratch, magick, dimensions, resolve_source,
     transparent_count = sum(alpha == 0 for alpha in composed[3::4])
     # A mask covering every stripe gap gives no visible pop-out effect.
     require(transparent_count > 0, 'No transparent background gaps remain; revise the mask or stripe spacing.')
-    report = {'foreground_bounds': plan['_foreground_bounds'], 'bar_width': bar_width,
+    report = {'foreground_bounds': plan['_foreground_bounds'], 'layout': plan['layout'],
+              'subject_cut_positions': plan['_subject_cut_positions'],
+              'bar_width': bar_width,
               'gap_width': gap_width, 'corner_radius': radius,
               'fully_protected_pixels': protected_count, 'foreground_pixels_preserved': preserved,
               'transparent_pixels': transparent_count,
